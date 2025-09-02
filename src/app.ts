@@ -44,9 +44,6 @@ app.use(express.json());
 
 /**
  * Retrieve a customer by ID.
- * @route GET /api/customers/:id
- * @param req - Express request object
- * @param res - Express response object
  */
 app.get("/api/customers/:id", (req: Request, res: Response): void => {
     const customerId: number = parseInt(req.params.id);
@@ -62,9 +59,6 @@ app.get("/api/customers/:id", (req: Request, res: Response): void => {
 
 /**
  * Record a purchase for a customer and update status based on points.
- * @route POST /api/customers/:id/purchase
- * @param req - Express request object
- * @param res - Express response object
  */
 app.post("/api/customers/:id/purchase", (req: Request, res: Response): void => {
     const customerId: number = parseInt(req.params.id);
@@ -95,34 +89,52 @@ app.post("/api/customers/:id/purchase", (req: Request, res: Response): void => {
 
 /**
  * Update customer preferences, such as notifications, preferred store, and email.
- * @route PATCH /api/customers/:id/preferences
- * @param req - Express request object
- * @param res - Express response object
  */
-app.patch(
-    "/api/customers/:id/preferences",
-    (req: Request, res: Response): void => {
-        const customerId: number = parseInt(req.params.id);
-        const customer: Customer | undefined = customers.find(
-            (c) => c.id === customerId
-        );
-        if (!customer) {
-            res.status(404).send("Customer not found");
-            return;
-        }
-
-        if (typeof req.body.notifications === "boolean") {
-            customer.notifications = req.body.notifications;
-        }
-        if (typeof req.body.preferredStore === "string") {
-            customer.preferredStore = req.body.preferredStore;
-        }
-        if (typeof req.body.email === "string") {
-            customer.email = req.body.email;
-        }
-
-        res.json(customer);
+app.patch("/api/customers/:id/preferences", (req: Request, res: Response): void => {
+    const customerId: number = parseInt(req.params.id);
+    const customer: Customer | undefined = customers.find(
+        (c) => c.id === customerId
+    );
+    if (!customer) {
+        res.status(404).send("Customer not found");
+        return;
     }
-);
+
+    if (typeof req.body.notifications === "boolean") {
+        customer.notifications = req.body.notifications;
+    }
+    if (typeof req.body.preferredStore === "string") {
+        customer.preferredStore = req.body.preferredStore;
+    }
+    if (typeof req.body.email === "string") {
+        customer.email = req.body.email;
+    }
+
+    res.json(customer);
+});
+
+/**
+ * Ticket #6: Get loyalty program analytics.
+ */
+app.get("/api/analytics", (req: Request, res: Response): void => {
+    const stats = {
+        bronze: 0,
+        silver: 0,
+        gold: 0,
+        platinum: 0,
+        totalPoints: 0,
+        totalCustomers: customers.length,
+    };
+
+    for (const c of customers) {
+        stats.totalPoints += c.points;
+        if (c.status === "BRONZE") stats.bronze++;
+        else if (c.status === "SILVER") stats.silver++;
+        else if (c.status === "GOLD") stats.gold++;
+        else if (c.status === "PLATINUM") stats.platinum++;
+    }
+
+    res.json(stats);
+});
 
 export default app;
