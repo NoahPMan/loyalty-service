@@ -45,8 +45,6 @@ app.use(express.json());
 /**
  * Retrieve a customer by ID.
  * @route GET /api/customers/:id
- * @param req - Express request object
- * @param res - Express response object
  */
 app.get("/api/customers/:id", (req: Request, res: Response): void => {
     const customerId: number = parseInt(req.params.id);
@@ -63,8 +61,6 @@ app.get("/api/customers/:id", (req: Request, res: Response): void => {
 /**
  * Record a purchase for a customer and update status based on points.
  * @route POST /api/customers/:id/purchase
- * @param req - Express request object
- * @param res - Express response object
  */
 app.post("/api/customers/:id/purchase", (req: Request, res: Response): void => {
     const customerId: number = parseInt(req.params.id);
@@ -96,8 +92,6 @@ app.post("/api/customers/:id/purchase", (req: Request, res: Response): void => {
 /**
  * Update customer preferences, such as notifications, preferred store, and email.
  * @route PATCH /api/customers/:id/preferences
- * @param req - Express request object
- * @param res - Express response object
  */
 app.patch(
     "/api/customers/:id/preferences",
@@ -124,5 +118,16 @@ app.patch(
         res.json(customer);
     }
 );
+
+/**
+ * Get all customers with total count.
+ * @route GET /api/customers
+ */
+app.get("/api/customers", (req: Request, res: Response): void => {
+    res.json({
+        total: customers.length,
+        customers,
+    });
+});
 
 export default app;
